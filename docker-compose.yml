@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cohort_insights_api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Cohort Insights API
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - MONGODB_URL=mongodb://mongo:27017
+      - DATABASE_NAME=cohort_insights
+      - REDIS_URL=redis://redis:6379/0
+      - REDIS_CACHE_TTL_SECONDS=86400
+      - REDIS_RATELIMIT_TTL_SECONDS=3600
+      - MAX_ACTIVE_DOCUMENTS=3
+      - SIMULATION_PROCESSING_DELAY_MIN=10.0
+      - SIMULATION_PROCESSING_DELAY_MAX=20.0
+      - SIMULATION_ENRICHING_DELAY_MIN=5.0
+      - SIMULATION_ENRICHING_DELAY_MAX=15.0
+      - STAGE_FAILURE_RATE=0.10
+      - LEASE_TIMEOUT_SECONDS=60
+      - WORKER_POLL_INTERVAL_SECONDS=1.0
+      - ENABLE_IN_PROCESS_WORKER=true
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7.0
+    container_name: cohort_insights_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok", "--quiet"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: cohort_insights_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  redis_data:

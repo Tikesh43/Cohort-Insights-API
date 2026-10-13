@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cohort_insights_test_runner
+    environment:
+      - ENVIRONMENT=test
+      - DEBUG=true
+      - MONGODB_URL=mongodb://mongo:27017
+      - DATABASE_NAME=cohort_insights_test
+      - TEST_DATABASE_NAME=cohort_insights_test
+      - REDIS_URL=redis://redis:6379/0
+      - PROCESSING_SECONDS=0.05
+      - ENRICHING_SECONDS=0.05
+      - FAILURE_RATE=0.0
+      - ENABLE_IN_PROCESS_WORKER=false
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["pytest", "-v"]

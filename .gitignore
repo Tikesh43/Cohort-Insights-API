@@ -1,0 +1,30 @@
+# Virtual Environments
+.venv/
+myenv/
+env/
+venv/
+
+# Legacy / scratch directories
+Myfastapi/
+project/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local Environment Variables
+.env
+
+# Database / SQLite scratch
+*.db
+*.sqlite3
+
+# Operating System
+.DS_Store
+Thumbs.db
